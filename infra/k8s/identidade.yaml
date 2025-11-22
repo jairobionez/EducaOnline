@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identidade-service
+  namespace: educaonline
+  labels:
+    app: identidade-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: identidade-service
+  template:
+    metadata:
+      labels:
+        app: identidade-service
+    spec:
+      containers:
+        - name: identidade
+          image: educaonline.identidade.api:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: MessageQueueConnection__MessageBus
+              value: "amqp://guest:guest@rabbitmq:5672"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: identidade-service
+  namespace: educaonline
+spec:
+  selector:
+    app: identidade-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

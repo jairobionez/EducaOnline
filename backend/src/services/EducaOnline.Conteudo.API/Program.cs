@@ -21,4 +21,7 @@ var app = builder.Build();
 DbMigrationHelpers.EnsureSeedData(app).Wait();
 app.UseApiConfig(app.Environment);
 
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready");
+
 app.Run();

@@ -26,4 +26,7 @@ app
     .UseSwaggerConfiguration()
     .UseApiConfiguration();
 
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready");
+
 app.Run();

@@ -14,6 +14,7 @@ namespace EducaOnline.Financeiro.API.Configurations
             );
 
             services.AddControllers();
+            services.AddHealthChecks();
 
             services.Configure<PagamentoConfig>(configuration.GetSection("PagamentoConfig"));
 

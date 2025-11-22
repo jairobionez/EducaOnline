@@ -19,6 +19,8 @@ namespace EducaOnline.Aluno.API.Configuration
                      options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
                  });
 
+            services.AddHealthChecks();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("Total",

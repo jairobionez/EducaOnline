@@ -21,6 +21,7 @@ namespace EducaOnline.Identidade.API.Configurations
 
 
             services.AddControllers();
+            services.AddHealthChecks();
             return services;
         }
 

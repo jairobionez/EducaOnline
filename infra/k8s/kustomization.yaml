@@ -1,0 +1,12 @@
+namespace: educaonline
+resources:
+  - namespace.yaml
+  - identidade.yaml
+  - conteudo.yaml
+  - aluno.yaml
+  - financeiro.yaml
+  - pedidos.yaml
+  - frontend.yaml
+  - nginx.yaml
+  - rabbitmq.yaml
+

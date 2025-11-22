@@ -689,6 +689,129 @@ Após iniciar todos os serviços com sucesso:
 
 ---
 
+## **DevOps & Deploy (Resumo aplicado no repositório)**
+
+Implementações realizadas para facilitar CI/CD, containerização e deploy em Kubernetes:
+
+- **.NET**: projetos compilam com .NET 8/9 conforme `TargetFramework` já presente.
+- **Docker**: `Dockerfile` por serviço (backend já possuía; adicionado `frontend/apps/educa-online/Dockerfile`).
+- **Kubernetes**: templates em `infra/k8s/` (Deployment/Service) para frontend e backend.
+- **GitHub Actions**: workflows em `.github/workflows/`:
+   - `backend-ci.yml`: restore, build, test e build de imagens Docker (push opcional via secrets).
+   - `frontend-ci.yml`: instala dependências, build com `nx` e build de imagem Docker (push opcional).
+- **Resiliência**: Polly já presente nas building blocks; adicionados endpoints de health (`/health` e `/health/ready`) em cada API.
+- **Banco de dados**: padrão para Development é SQLite (files `*.db` gerados automaticamente). Para produção, use SQL Server configurando `ConnectionStrings:DefaultConnection` com a string do servidor.
+
+Comandos rápidos:
+
+- Build local do backend e execução (exemplo):
+```powershell
+cd backend/src/Services/EducaOnline.Pedidos.API
+dotnet run
+```
+
+- Rodar frontend em dev:
+```bash
+cd frontend
+npx nx serve educa-online
+```
+
+-- Criar cluster local com Minikube (recomendado):
+```powershell
+minikube start --driver=docker
+# Use the kustomize manifests in `infra/k8s` (recommended):
+kubectl apply -k infra/k8s
+
+# Or use the helper PowerShell script to build/load images and deploy:
+powershell -ExecutionPolicy Bypass -File infra\k8s\deploy-minikube.ps1
+
+### Build automático das imagens (script)
+
+Se estiver com problemas de `ErrImageNeverPull`, use o script que builda todas as imagens localmente e tenta carregá-las no Minikube:
+
+```powershell
+# roda o build de todas as imagens e carrega no minikube (se disponível)
+powershell -ExecutionPolicy Bypass -File infra\k8s\build-and-load-images.ps1
+```
+
+O script faz:
+- tenta `minikube image build -t <tag> <path>` quando `minikube` está disponível;
+- se `minikube` não estiver disponível ou falhar, faz `docker build -t <tag> <path>` e instrui sobre `minikube image load`.
+
+Após o build, reinicie os deployments:
+
+```powershell
+kubectl rollout restart deployment --all -n educaonline
+kubectl get pods -n educaonline
+```
+```
+
+### Deploy no Minikube (local)
+
+Passos rápidos para rodar tudo localmente no Minikube (Windows PowerShell):
+
+1. Inicie o Minikube (driver Docker) e verifique status:
+
+```powershell
+minikube start --driver=docker
+minikube status
+```
+
+2. Para construir as imagens locais, carregá-las no Minikube e aplicar manifests, execute o script:
+
+```powershell
+.\infra\k8s\deploy-minikube.ps1
+```
+
+O script faz build de cada serviço que contém um `Dockerfile` em `backend/src/services/*`, carrega as imagens no Minikube e aplica os manifests via `kubectl apply -k infra/k8s`.
+
+3. Acesse o frontend:
+
+```powershell
+minikube service frontend --url -n educaonline
+```
+
+---
+
+### Deploy e acesso ao Nginx no Minikube
+
+O Nginx atua como reverse proxy para frontend e backend.
+
+**Build da imagem Nginx:**
+
+```powershell
+cd infra/nginx
+minikube image build -t nginx-custom:local .
+```
+
+**Deploy no cluster:**
+
+```powershell
+cd ../k8s
+kubectl apply -k .
+```
+
+**Acesso ao Nginx:**
+
+- Descubra o IP do Minikube:
+   ```powershell
+   minikube ip
+   ```
+- Acesse via navegador:
+   `http://<MINIKUBE_IP>:32080`
+
+O Nginx faz proxy para o frontend e backend conforme configurado em `infra/nginx/nginx.conf`.
+
+Observações:
+- Os serviços backend são expostos como `NodePort` (ex.: frontend -> `30080`, backend template -> `30001`). Ajuste `infra/k8s/*` se precisar de portas diferentes.
+- Se preferir usar `minikube docker-env` para construir direto no daemon Docker do Minikube, rode `minikube docker-env | Invoke-Expression` antes do `docker build`.
+
+
+Observações sobre GitHub Actions:
+- Para push automático de imagens configure os secrets `REGISTRY_URL`, `REGISTRY_USERNAME` e `REGISTRY_PASSWORD` no repositório.
+- Workflows são básicos e destinam-se a CI e imagem; para CD automatizado adapte a etapa `build-and-push-image` para seu registry e ambiente.
+
+
 ## **17. Melhorias Futuras (Sugestões)**
 
 ### **Curto Prazo:**

@@ -8,6 +8,7 @@ namespace EducaOnline.Bff.Configurations
         public static IServiceCollection AddApiConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
+            services.AddHealthChecks();
             services.Configure<AppServicesSettings>(configuration);
 
             services.AddCors(options =>

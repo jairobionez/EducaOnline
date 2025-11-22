@@ -13,6 +13,7 @@ namespace EducaOnline.Pedidos.API.Configurations
             );
 
             services.AddControllers();
+            services.AddHealthChecks();
             
 
             services.AddCors(options =>
