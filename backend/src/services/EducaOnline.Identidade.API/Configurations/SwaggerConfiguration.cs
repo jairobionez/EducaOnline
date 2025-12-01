@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace EducaOnline.Identidade.API.Configurations
 {
@@ -24,11 +25,23 @@ namespace EducaOnline.Identidade.API.Configurations
 
         public static WebApplication UseSwaggerConfiguration(this WebApplication app)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            if (!app.Environment.IsDevelopment())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "EducaOnline Identity API V1");
-            });
+                app.UseSwagger(c => { c.RouteTemplate = "api/identidade/swagger/{documentName}/swagger.json"; });
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/api/identidade/swagger/v1/swagger.json", "EducaOnline Identity API V1");
+                    c.RoutePrefix = "api/identidade/swagger";
+                });
+            }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "EducaOnline Identity API V1");
+                });
+            }
 
             return app;
         }

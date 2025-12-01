@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace EducaOnline.Conteudo.API.Configuration
 {
@@ -49,11 +50,25 @@ namespace EducaOnline.Conteudo.API.Configuration
 
         public static IApplicationBuilder UseSwaggerConfig(this IApplicationBuilder app)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            var env = app.ApplicationServices.GetRequiredService<IHostEnvironment>();
+
+            if (!env.IsDevelopment())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-            });
+                app.UseSwagger(c => { c.RouteTemplate = "api/conteudo/swagger/{documentName}/swagger.json"; });
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/api/conteudo/swagger/v1/swagger.json", "v1");
+                    c.RoutePrefix = "api/conteudo/swagger";
+                });
+            }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+                });
+            }
 
             return app;
         }

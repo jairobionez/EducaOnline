@@ -35,7 +35,7 @@ spec:
             periodSeconds: 20
           env:
             - name: ASPNETCORE_ENVIRONMENT
-              value: "Development"
+              value: "Production"
             - name: MessageQueueConnection__MessageBus
               value: "amqp://guest:guest@rabbitmq:5672"
           resources:

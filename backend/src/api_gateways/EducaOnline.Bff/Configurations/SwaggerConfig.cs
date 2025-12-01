@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace EducaOnline.Bff.Configurations
 {
@@ -48,11 +49,23 @@ namespace EducaOnline.Bff.Configurations
 
         public static WebApplication UseSwaggerConfiguration(this WebApplication app)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            if (!app.Environment.IsDevelopment())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "EducaOnline BFF V1");
-            });
+                app.UseSwagger(c => { c.RouteTemplate = "api/bff/swagger/{documentName}/swagger.json"; });
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/api/bff/swagger/v1/swagger.json", "EducaOnline BFF V1");
+                    c.RoutePrefix = "api/bff/swagger";
+                });
+            }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "EducaOnline BFF V1");
+                });
+            }
 
             return app;
         }

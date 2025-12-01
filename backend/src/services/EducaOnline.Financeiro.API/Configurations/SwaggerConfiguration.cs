@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace EducaOnline.Financeiro.API.Configurations
 {
@@ -52,11 +53,23 @@ namespace EducaOnline.Financeiro.API.Configurations
 
         public static WebApplication UseSwaggerConfiguration(this WebApplication app)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            if (!app.Environment.IsDevelopment())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "EducaOnline Financeiro API V1");
-            });
+                app.UseSwagger(c => { c.RouteTemplate = "api/financeiro/swagger/{documentName}/swagger.json"; });
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/api/financeiro/swagger/v1/swagger.json", "EducaOnline Financeiro API V1");
+                    c.RoutePrefix = "api/financeiro/swagger";
+                });
+            }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "EducaOnline Financeiro API V1");
+                });
+            }
 
             return app;
         }
