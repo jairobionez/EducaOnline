@@ -93,7 +93,7 @@ jobs:
             dockerfile: backend/src/services/EducaOnline.Aluno.API/Dockerfile
             context: .
           - service: pedidos-api
-            dockerfile: backend/src/services/Educaonline.Pedidos.API/Dockerfile
+            dockerfile: backend/src/services/EducaOnline.Pedidos.API/Dockerfile
             context: .
           - service: financeiro-api
             dockerfile: backend/src/services/EducaOnline.Financeiro.API/Dockerfile
