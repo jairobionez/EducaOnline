@@ -13,10 +13,9 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - educaonline-network
 
@@ -24,6 +23,7 @@ services:
   # Serviços de Identidade
   # ============================================
   identidade-api:
+    user: "1000:1000"
     image: educaonline/identidade-api:latest
     build:
       context: backend
@@ -39,10 +39,12 @@ services:
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
+    volumes:
+      - dpkeys-identidade:/home/app/.aspnet/DataProtection-Keys
     networks:
       - educaonline-network
 
@@ -50,6 +52,7 @@ services:
   # Serviços de Conteúdo
   # ============================================
   conteudo-api:
+    user: "1000:1000"
     image: educaonline/conteudo-api:latest
     build:
       context: backend
@@ -65,12 +68,14 @@ services:
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       identidade-api:
         condition: service_started
+    volumes:
+      - dpkeys-conteudo:/home/app/.aspnet/DataProtection-Keys
     networks:
       - educaonline-network
 
@@ -78,6 +83,7 @@ services:
   # Serviços de Aluno
   # ============================================
   aluno-api:
+    user: "1000:1000"
     image: educaonline/aluno-api:latest
     build:
       context: backend
@@ -93,12 +99,14 @@ services:
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       identidade-api:
         condition: service_started
+    volumes:
+      - dpkeys-aluno:/home/app/.aspnet/DataProtection-Keys
     networks:
       - educaonline-network
 
@@ -106,6 +114,7 @@ services:
   # Serviços de Pedidos
   # ============================================
   pedidos-api:
+    user: "1000:1000"
     image: educaonline/pedidos-api:latest
     build:
       context: backend
@@ -121,12 +130,14 @@ services:
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       identidade-api:
         condition: service_started
+    volumes:
+      - dpkeys-pedidos:/home/app/.aspnet/DataProtection-Keys
     networks:
       - educaonline-network
 
@@ -134,6 +145,7 @@ services:
   # Serviços Financeiros
   # ============================================
   financeiro-api:
+    user: "1000:1000"
     image: educaonline/financeiro-api:latest
     build:
       context: backend
@@ -149,12 +161,14 @@ services:
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       identidade-api:
         condition: service_started
+    volumes:
+      - dpkeys-financeiro:/home/app/.aspnet/DataProtection-Keys
     networks:
       - educaonline-network
 
@@ -162,6 +176,7 @@ services:
   # BFF Gateway
   # ============================================
   bff-api:
+    user: "1000:1000"
     image: educaonline/bff-api:latest
     build:
       context: backend
@@ -183,7 +198,7 @@ services:
       - ServiceUrls__FinanceiroUrl=http://financeiro-api:8080
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       identidade-api:
         condition: service_started
       conteudo-api:
@@ -201,4 +216,9 @@ networks:
   educaonline-network:
     driver: bridge
 
-
+volumes:
+  dpkeys-identidade:
+  dpkeys-conteudo:
+  dpkeys-aluno:
+  dpkeys-pedidos:
+  dpkeys-financeiro:
