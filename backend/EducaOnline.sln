@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EducaOnline.Financeiro.Paga
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pedidos", "Pedidos", "{463A7642-7937-4DB6-B1B3-CA8FF28606C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EducaOnline.Pedidos.API", "src\services\Educaonline.Pedidos.API\EducaOnline.Pedidos.API.csproj", "{27AC334E-E37E-4D0B-BEC8-024B6198794E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EducaOnline.Pedidos.API", "src\services\EducaOnline.Pedidos.API\EducaOnline.Pedidos.API.csproj", "{27AC334E-E37E-4D0B-BEC8-024B6198794E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateways", "ApiGateways", "{D8FE215A-42BC-46F4-96C6-A2C02ED0CBD6}"
 EndProject
