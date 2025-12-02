@@ -19,21 +19,21 @@ COPY ["src/building_blocks/EducaOnline.MessageBus/EducaOnline.MessageBus.csproj"
 COPY ["src/building_blocks/EducaOnline.WebAPI.Core/EducaOnline.WebAPI.Core.csproj", "src/building_blocks/EducaOnline.WebAPI.Core/"]
 
 # Copy service project
-COPY ["src/services/Educaonline.Pedidos.API/Educaonline.Pedidos.API.csproj", "src/services/Educaonline.Pedidos.API/"]
-RUN dotnet restore "./src/services/Educaonline.Pedidos.API/Educaonline.Pedidos.API.csproj"
+COPY ["src/services/EducaOnline.Pedidos.API/EducaOnline.Pedidos.API.csproj", "src/services/EducaOnline.Pedidos.API/"]
+RUN dotnet restore "./src/services/EducaOnline.Pedidos.API/EducaOnline.Pedidos.API.csproj"
 
 # Copy all source code
 COPY . .
-WORKDIR "/src/src/services/Educaonline.Pedidos.API"
-RUN dotnet build "./Educaonline.Pedidos.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/src/services/EducaOnline.Pedidos.API"
+RUN dotnet build "./EducaOnline.Pedidos.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Educaonline.Pedidos.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./EducaOnline.Pedidos.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Educaonline.Pedidos.API.dll"]
+ENTRYPOINT ["dotnet", "EducaOnline.Pedidos.API.dll"]
