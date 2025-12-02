@@ -85,22 +85,22 @@ jobs:
         include:
           - service: identidade-api
             dockerfile: backend/src/services/EducaOnline.Identidade.API/Dockerfile
-            context: .
+            context: backend
           - service: conteudo-api
             dockerfile: backend/src/services/EducaOnline.Conteudo.API/Dockerfile
-            context: .
+            context: backend
           - service: aluno-api
             dockerfile: backend/src/services/EducaOnline.Aluno.API/Dockerfile
-            context: .
+            context: backend
           - service: pedidos-api
             dockerfile: backend/src/services/EducaOnline.Pedidos.API/Dockerfile
-            context: .
+            context: backend
           - service: financeiro-api
             dockerfile: backend/src/services/EducaOnline.Financeiro.API/Dockerfile
-            context: .
+            context: backend
           - service: bff-api
             dockerfile: backend/src/api-gateways/EducaOnline.Bff/Dockerfile
-            context: .
+            context: backend
 
     steps:
       - name: Checkout
