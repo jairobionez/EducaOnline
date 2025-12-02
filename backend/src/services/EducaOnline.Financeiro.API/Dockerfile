@@ -12,8 +12,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# Copy building blocks first (for cache optimization)
+COPY ["src/building_blocks/EducaOnline.MessageBus/EducaOnline.MessageBus.csproj", "src/building_blocks/EducaOnline.MessageBus/"]
+COPY ["src/building_blocks/EducaOnline.WebAPI.Core/EducaOnline.WebAPI.Core.csproj", "src/building_blocks/EducaOnline.WebAPI.Core/"]
+
+# Copy service dependencies
+COPY ["src/services/EducaOnline.Financeiro.Pagamentos/EducaOnline.Financeiro.Pagamentos.csproj", "src/services/EducaOnline.Financeiro.Pagamentos/"]
+
+# Copy service project
 COPY ["src/services/EducaOnline.Financeiro.API/EducaOnline.Financeiro.API.csproj", "src/services/EducaOnline.Financeiro.API/"]
 RUN dotnet restore "./src/services/EducaOnline.Financeiro.API/EducaOnline.Financeiro.API.csproj"
+
+# Copy all source code
 COPY . .
 WORKDIR "/src/src/services/EducaOnline.Financeiro.API"
 RUN dotnet build "./EducaOnline.Financeiro.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
