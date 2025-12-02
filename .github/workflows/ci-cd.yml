@@ -1,0 +1,186 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  REGISTRY: docker.io
+
+jobs:
+  # ============================================
+  # Backend Build and Test
+  # ============================================
+  backend-build-test:
+    name: Backend - Build e Testes
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore dependencies
+        run: dotnet restore backend/EducaOnline.sln
+
+      - name: Build
+        run: dotnet build backend/EducaOnline.sln -c Release --no-restore
+
+      - name: Run tests
+        run: dotnet test backend/EducaOnline.sln -c Release --no-build --verbosity normal
+        continue-on-error: true
+
+  # ============================================
+  # Frontend Build and Test
+  # ============================================
+  frontend-build-test:
+    name: Frontend - Build e Testes
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build
+        working-directory: frontend
+        run: npx nx build educa-online --configuration=production
+
+  # ============================================
+  # Docker Build and Push - Backend
+  # ============================================
+  docker-backend-build-push:
+    name: Docker - Build e Push Backend
+    runs-on: ubuntu-latest
+    needs: backend-build-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    strategy:
+      matrix:
+        include:
+          - service: identidade-api
+            dockerfile: backend/src/services/EducaOnline.Identidade.API/Dockerfile
+            context: .
+          - service: conteudo-api
+            dockerfile: backend/src/services/EducaOnline.Conteudo.API/Dockerfile
+            context: .
+          - service: aluno-api
+            dockerfile: backend/src/services/EducaOnline.Aluno.API/Dockerfile
+            context: .
+          - service: pedidos-api
+            dockerfile: backend/src/services/Educaonline.Pedidos.API/Dockerfile
+            context: .
+          - service: financeiro-api
+            dockerfile: backend/src/services/EducaOnline.Financeiro.API/Dockerfile
+            context: .
+          - service: bff-api
+            dockerfile: backend/src/api-gateways/EducaOnline.Bff/Dockerfile
+            context: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        if: secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != ''
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/educaonline-{1}', secrets.DOCKERHUB_USERNAME, matrix.service) || format('educaonline-{0}', matrix.service) }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: ${{ secrets.DOCKERHUB_USERNAME != '' && github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Docker Build and Push - Frontend
+  # ============================================
+  docker-frontend-build-push:
+    name: Docker - Build e Push Frontend
+    runs-on: ubuntu-latest
+    needs: frontend-build-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        if: secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != ''
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/educaonline-frontend', secrets.DOCKERHUB_USERNAME) || 'educaonline-frontend' }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/apps/educa-online/Dockerfile
+          push: ${{ secrets.DOCKERHUB_USERNAME != '' && github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

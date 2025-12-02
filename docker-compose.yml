@@ -1,0 +1,260 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Infraestrutura
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: educaonline-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - educaonline-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  # ============================================
+  # Serviços de Identidade
+  # ============================================
+  identidade-api:
+    image: educaonline/identidade-api:latest
+    build:
+      context: .
+      dockerfile: backend/src/services/EducaOnline.Identidade.API/Dockerfile
+    container_name: educaonline-identidade-api
+    ports:
+      - "7070:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/UserDatabase.db
+      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__HorasParaExpirar=2
+      - JwtSettings__Emissor=Educaonline
+      - JwtSettings__Audiencia=https://localhost
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - educaonline-network
+    volumes:
+      - identidade-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Serviços de Conteúdo
+  # ============================================
+  conteudo-api:
+    image: educaonline/conteudo-api:latest
+    build:
+      context: .
+      dockerfile: backend/src/services/EducaOnline.Conteudo.API/Dockerfile
+    container_name: educaonline-conteudo-api
+    ports:
+      - "7183:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/ConteudoDatabase.db
+      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__HorasParaExpirar=2
+      - JwtSettings__Emissor=Educaonline
+      - JwtSettings__Audiencia=https://localhost
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      identidade-api:
+        condition: service_healthy
+    networks:
+      - educaonline-network
+    volumes:
+      - conteudo-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Serviços de Aluno
+  # ============================================
+  aluno-api:
+    image: educaonline/aluno-api:latest
+    build:
+      context: .
+      dockerfile: backend/src/services/EducaOnline.Aluno.API/Dockerfile
+    container_name: educaonline-aluno-api
+    ports:
+      - "7094:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/AlunoDatabase.db
+      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__HorasParaExpirar=2
+      - JwtSettings__Emissor=Educaonline
+      - JwtSettings__Audiencia=https://localhost
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      identidade-api:
+        condition: service_healthy
+    networks:
+      - educaonline-network
+    volumes:
+      - aluno-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Serviços de Pedidos
+  # ============================================
+  pedidos-api:
+    image: educaonline/pedidos-api:latest
+    build:
+      context: .
+      dockerfile: backend/src/services/Educaonline.Pedidos.API/Dockerfile
+    container_name: educaonline-pedidos-api
+    ports:
+      - "7244:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/PedidosDatabase.db
+      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__HorasParaExpirar=2
+      - JwtSettings__Emissor=Educaonline
+      - JwtSettings__Audiencia=https://localhost
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      identidade-api:
+        condition: service_healthy
+    networks:
+      - educaonline-network
+    volumes:
+      - pedidos-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Serviços Financeiros
+  # ============================================
+  financeiro-api:
+    image: educaonline/financeiro-api:latest
+    build:
+      context: .
+      dockerfile: backend/src/services/EducaOnline.Financeiro.API/Dockerfile
+    container_name: educaonline-financeiro-api
+    ports:
+      - "7059:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/FinanceiroDatabase.db
+      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__HorasParaExpirar=2
+      - JwtSettings__Emissor=Educaonline
+      - JwtSettings__Audiencia=https://localhost
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;publisherConfirms=true;timeout=10
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      identidade-api:
+        condition: service_healthy
+    networks:
+      - educaonline-network
+    volumes:
+      - financeiro-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # BFF Gateway
+  # ============================================
+  bff-api:
+    image: educaonline/bff-api:latest
+    build:
+      context: .
+      dockerfile: backend/src/api-gateways/EducaOnline.Bff/Dockerfile
+    container_name: educaonline-bff-api
+    ports:
+      - "7093:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__HorasParaExpirar=2
+      - JwtSettings__Emissor=Educaonline
+      - JwtSettings__Audiencia=https://localhost
+      - ServiceUrls__IdentidadeUrl=http://identidade-api:8080
+      - ServiceUrls__ConteudoUrl=http://conteudo-api:8080
+      - ServiceUrls__AlunoUrl=http://aluno-api:8080
+      - ServiceUrls__PedidosUrl=http://pedidos-api:8080
+      - ServiceUrls__FinanceiroUrl=http://financeiro-api:8080
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      identidade-api:
+        condition: service_healthy
+      conteudo-api:
+        condition: service_healthy
+      aluno-api:
+        condition: service_healthy
+      pedidos-api:
+        condition: service_healthy
+      financeiro-api:
+        condition: service_healthy
+    networks:
+      - educaonline-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  educaonline-network:
+    driver: bridge
+
+volumes:
+  rabbitmq-data:
+  identidade-data:
+  conteudo-data:
+  aluno-data:
+  pedidos-data:
+  financeiro-data:

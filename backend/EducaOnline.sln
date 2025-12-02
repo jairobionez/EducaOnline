@@ -47,7 +47,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateways", "ApiGateways"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Compras", "Compras", "{2802343E-A1AE-47B8-904E-227479237B24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EducaOnline.Bff", "src\api_gateways\EducaOnline.Bff\EducaOnline.Bff.csproj", "{9B71C015-9B73-2460-3798-A94CF30915A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EducaOnline.Bff", "src\api-gateways\EducaOnline.Bff\EducaOnline.Bff.csproj", "{9B71C015-9B73-2460-3798-A94CF30915A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

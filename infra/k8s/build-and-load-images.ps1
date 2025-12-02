@@ -10,7 +10,7 @@ $services = @(
     @{ name = 'educa-online-frontend'; path = 'frontend/apps/educa-online' },
     @{ name = 'nginx-custom'; path = 'infra/nginx' }
     @{ name = 'rabbitmq-custom'; path = 'infra/rabbitmq' }
-    @{ name = 'educaonline.bff'; path = 'backend/src/api_gateways/EducaOnline.Bff' }
+    @{ name = 'educaonline.bff'; path = 'backend/src/api-gateways/EducaOnline.Bff' }
 )
 
 function CommandExists($cmd) {

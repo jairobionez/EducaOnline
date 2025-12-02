@@ -237,7 +237,7 @@ dotnet run
 
 ```bash
 # Em um NOVO terminal
-cd backend/src/api_gateways/EducaOnline.Bff
+cd backend/src/api-gateways/EducaOnline.Bff
 dotnet run
 ```
 

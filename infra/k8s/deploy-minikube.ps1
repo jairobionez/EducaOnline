@@ -18,7 +18,7 @@ minikube start --driver=docker
 
 Write-Host "Building backend service images and loading into minikube..."
 
-$bffServicesPath = Join-Path -Path $PSScriptRoot -ChildPath "..\..\backend\src\api_gateways"
+$bffServicesPath = Join-Path -Path $PSScriptRoot -ChildPath "..\..\backend\src\api-gateways"
 Get-ChildItem -Path $bffServicesPath -Directory | ForEach-Object {
     $svc = $_
     $dockerfile = Join-Path $svc.FullName "Dockerfile"
