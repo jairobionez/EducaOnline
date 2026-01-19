@@ -21,7 +21,7 @@ namespace EducaOnline.Bff.Services
 
         public async Task<CursoDto?> BuscarCurso(Guid cursoId)
         {
-            var response = await _httpClient.GetAsync($"/api/conteudos/{cursoId}");
+            var response = await CircuitBreakerPolicy.ExecuteAsync(() => _httpClient.GetAsync($"/api/conteudos/{cursoId}"));
             TratarErrosResponse(response);
             return await DeserializarObjetoResponse<CursoDto>(response);
         }

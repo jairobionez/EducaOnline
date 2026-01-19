@@ -27,7 +27,7 @@ namespace EducaOnline.WebAPI.Core.Usuario
             return claim!.Value;
         }
 
-        public static string GetUserToken(this ClaimsPrincipal principal)
+        public static string? GetUserToken(this ClaimsPrincipal principal)
         {
             if (principal == null)
             {

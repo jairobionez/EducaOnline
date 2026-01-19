@@ -23,7 +23,7 @@ namespace EducaOnline.Bff.Services
 
         public async Task<MatriculaDto?> ObterMatricula(Guid id)
         {
-            var response = await _httpClient.GetAsync($"/api/alunos/{id}/matricula");            
+            var response = await CircuitBreakerPolicy.ExecuteAsync(() => _httpClient.GetAsync($"/api/alunos/{id}/matricula"));            
             if (!TratarErrosResponse(response)) return default;
             return await DeserializarObjetoResponse<MatriculaDto>(response);
         }
@@ -32,7 +32,7 @@ namespace EducaOnline.Bff.Services
         {
             var conteudo = ObterConteudo(matricula);
 
-            var response = await _httpClient.PostAsync($"/api/alunos/matricular", conteudo);
+            var response = await CircuitBreakerPolicy.ExecuteAsync(() => _httpClient.PostAsync($"/api/alunos/matricular", conteudo));
 
             if (!TratarErrosResponse(response)) return await DeserializarObjetoResponse<ResponseResult>(response);
 

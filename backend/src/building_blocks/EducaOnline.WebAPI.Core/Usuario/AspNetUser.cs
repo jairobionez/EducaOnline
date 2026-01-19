@@ -24,14 +24,14 @@ namespace EducaOnline.WebAPI.Core.Usuario
             return EstaAutenticado() ? _accessor.HttpContext!.User.GetUserEmail() : "";
         }
 
-        public string ObterUserToken()
+        public string? ObterUserToken()
         {
-            return EstaAutenticado() ? _accessor.HttpContext!.User.GetUserToken() : "";
+            return EstaAutenticado() ? _accessor.HttpContext!.User.GetUserToken() : null;
         }
 
         public bool EstaAutenticado()
         {
-            return _accessor.HttpContext!.User.Identity!.IsAuthenticated!;
+            return _accessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
         }
 
         public bool PossuiRole(string role)

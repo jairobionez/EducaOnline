@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
         - name: financeiro
-          image: educaonline.financeiro.api:local
-          imagePullPolicy: Never
+          image: educaonline/financeiro-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -37,7 +37,15 @@ spec:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
             - name: MessageQueueConnection__MessageBus
-              value: "amqp://guest:guest@rabbitmq:5672"
+              valueFrom:
+                secretKeyRef:
+                  name: messagebus-secret
+                  key: MESSAGE_BUS_URL
+            - name: JwtSettings__Segredo
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: "100m"

@@ -8,9 +8,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    env_file:
+      - .env
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
@@ -31,15 +33,17 @@ services:
     container_name: educaonline-identidade-api
     ports:
       - "7070:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/tmp/UserDatabase.db
-      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__Segredo=${JWT_SECRET}
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=${MESSAGE_BUS}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -60,15 +64,17 @@ services:
     container_name: educaonline-conteudo-api
     ports:
       - "7183:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/tmp/ConteudoDatabase.db
-      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__Segredo=${JWT_SECRET}
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=${MESSAGE_BUS}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -91,15 +97,17 @@ services:
     container_name: educaonline-aluno-api
     ports:
       - "7094:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/tmp/AlunoDatabase.db
-      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__Segredo=${JWT_SECRET}
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=${MESSAGE_BUS}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -122,15 +130,17 @@ services:
     container_name: educaonline-pedidos-api
     ports:
       - "7244:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/tmp/PedidosDatabase.db
-      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__Segredo=${JWT_SECRET}
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=${MESSAGE_BUS}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -153,15 +163,17 @@ services:
     container_name: educaonline-financeiro-api
     ports:
       - "7059:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/tmp/FinanceiroDatabase.db
-      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__Segredo=${JWT_SECRET}
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost
-      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=guest;password=guest;publisherConfirms=true;timeout=10
+      - MessageQueueConnection__MessageBus=${MESSAGE_BUS}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -184,10 +196,12 @@ services:
     container_name: educaonline-bff-api
     ports:
       - "7093:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - JwtSettings__Segredo=476a7f12-61d4-4ef9-92c5-7420e69e0c83
+      - JwtSettings__Segredo=${JWT_SECRET}
       - JwtSettings__HorasParaExpirar=2
       - JwtSettings__Emissor=Educaonline
       - JwtSettings__Audiencia=https://localhost

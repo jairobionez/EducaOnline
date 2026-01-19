@@ -24,6 +24,10 @@ namespace EducaOnline.MessageBus
             where TRequest : IntegrationEvent
             where TResponse : ResponseMessage;
 
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+            where TRequest : IntegrationEvent
+            where TResponse : ResponseMessage;
+
         IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
             where TRequest : IntegrationEvent
             where TResponse : ResponseMessage;

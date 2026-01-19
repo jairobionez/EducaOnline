@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: educa-online-frontend:local
-          imagePullPolicy: Never
+          image: educaonline/frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:

@@ -62,6 +62,14 @@ namespace EducaOnline.MessageBus
             return await _bus!.Rpc.RequestAsync<TRequest, TResponse>(request);
         }
 
+        public async Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+            where TRequest : IntegrationEvent
+            where TResponse : ResponseMessage
+        {
+            TryConnect();
+            return await _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken);
+        }
+
         public IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
             where TRequest : IntegrationEvent
             where TResponse : ResponseMessage

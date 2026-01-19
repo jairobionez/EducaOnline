@@ -53,10 +53,5 @@ namespace EducaOnLine.Pedidos.API.Data.Repository
             return await _context.PedidoItems
                 .FirstOrDefaultAsync(p => p.ProdutoId == produtoId && p.PedidoId == pedidoId);
         }
-
-        public void Dispose()
-        {
-            _context.Dispose();
-        }
     }
 }

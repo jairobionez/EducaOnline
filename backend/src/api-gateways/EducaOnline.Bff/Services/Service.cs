@@ -1,4 +1,6 @@
 ﻿using EducaOnline.Core.Communication;
+using Polly;
+using Polly.CircuitBreaker;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -7,6 +9,10 @@ namespace EducaOnline.Bff.Services
 {
     public abstract class Service
     {
+        protected static readonly AsyncCircuitBreakerPolicy<HttpResponseMessage> CircuitBreakerPolicy = Policy
+            .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+            .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+
         protected StringContent ObterConteudo(object dado)
         {
             return new StringContent(

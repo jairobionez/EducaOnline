@@ -33,7 +33,7 @@ namespace EducaOnLine.Pedidos.API.Application.Commands
             if (!ValidarPedido(pedido)) return ValidationResult;
 
             // Processar autorização pagamento
-            if (!await AutorizarPagamento(pedido, message)) return ValidationResult;
+            if (!await AutorizarPagamento(pedido, message, cancellationToken)) return ValidationResult;
 
             // Se pagamento tudo ok!
             pedido.AutorizarPedido();            
@@ -68,7 +68,7 @@ namespace EducaOnLine.Pedidos.API.Application.Commands
             return true;
         }
 
-        private async Task<bool> AutorizarPagamento(Pedido pedido, AdicionarPedidoCommand message)
+        private async Task<bool> AutorizarPagamento(Pedido pedido, AdicionarPedidoCommand message, CancellationToken cancellationToken)
         {
             var pedidoIniciado = new PedidoIniciadoIntegrationEvent
             {
@@ -83,7 +83,7 @@ namespace EducaOnLine.Pedidos.API.Application.Commands
             };
 
             var result = await _bus
-                .RequestAsync<PedidoIniciadoIntegrationEvent, ResponseMessage>(pedidoIniciado);
+                .RequestAsync<PedidoIniciadoIntegrationEvent, ResponseMessage>(pedidoIniciado, cancellationToken);
             
             if (result.ValidationResult.IsValid) return true;
 

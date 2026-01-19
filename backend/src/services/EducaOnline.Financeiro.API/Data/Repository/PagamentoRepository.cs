@@ -25,11 +25,6 @@ namespace EducaOnline.Financeiro.API.Data.Repository
             _context.Transacoes.Add(transacao);
         }
 
-        public void Dispose()
-        {
-            _context.Dispose();
-        }
-
         public async Task<Pagamento?> ObterPagamento(Guid pedidoId)
         {
             return await _context.Pagamentos.AsNoTracking()

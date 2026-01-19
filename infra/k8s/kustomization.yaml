@@ -1,11 +1,13 @@
 namespace: educaonline
 resources:
   - namespace.yaml
+  - secrets.yaml
   - identidade.yaml
   - conteudo.yaml
   - aluno.yaml
   - financeiro.yaml
   - pedidos.yaml
+  - bff.yaml
   - frontend.yaml
   - nginx.yaml
   - rabbitmq.yaml

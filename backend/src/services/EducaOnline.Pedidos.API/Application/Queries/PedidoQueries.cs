@@ -63,18 +63,18 @@ namespace EducaOnLine.Pedidos.API.Application.Queries
             await _pedidoRepository.ObterConexao().QueryAsync<PedidoRaw, PedidoItemRaw, PedidoDTO>(sql,
                 (pRaw, piRaw) =>
                 {
-                    var pId = Guid.Parse(pRaw.PedidoId);
+                    var pId = Guid.Parse(pRaw.PedidoId ?? Guid.Empty.ToString());
                     var p = lookup.GetValueOrDefault(pId) ?? new PedidoDTO
                     {
                         Id = pId,
-                        ClienteId = Guid.Parse(pRaw.ClienteId),
+                        ClienteId = Guid.Parse(pRaw.ClienteId ?? Guid.Empty.ToString()),
                         PedidoItems = new List<PedidoItemDTO>()
                     };
 
                     var pi = new PedidoItemDTO
                     {
                         PedidoId = pId,
-                        ProdutoId = Guid.Parse(piRaw.ProdutoId)
+                        ProdutoId = Guid.Parse(piRaw.ProdutoId ?? Guid.Empty.ToString())
                     };
 
                     p.PedidoItems.Add(pi);
@@ -114,14 +114,14 @@ namespace EducaOnLine.Pedidos.API.Application.Queries
 
     public class PedidoRaw
     {
-        public string PedidoId { get; set; }
-        public string ClienteId { get; set; }
+        public string? PedidoId { get; set; }
+        public string? ClienteId { get; set; }
     }
 
     public class PedidoItemRaw
     {
-        public string PedidoItemId { get; set; }
-        public string ProdutoId { get; set; }
+        public string? PedidoItemId { get; set; }
+        public string? ProdutoId { get; set; }
     }
 
 

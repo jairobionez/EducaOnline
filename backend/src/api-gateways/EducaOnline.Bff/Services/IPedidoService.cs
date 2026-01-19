@@ -25,7 +25,7 @@ namespace EducaOnline.Bff.Services
 
             var pedidoContent = ObterConteudo(pedido);
 
-            var response = await _httpClient.PostAsync("/pedido/", pedidoContent);
+            var response = await CircuitBreakerPolicy.ExecuteAsync(() => _httpClient.PostAsync("/pedido/", pedidoContent));
 
             if (!TratarErrosResponse(response)) return await DeserializarObjetoResponse<ResponseResult>(response);
 
